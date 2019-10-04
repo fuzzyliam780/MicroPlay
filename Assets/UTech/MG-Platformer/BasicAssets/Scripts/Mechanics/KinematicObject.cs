@@ -29,6 +29,7 @@ namespace Platformer.Mechanics
         /// </summary>
         /// <value></value>
         public bool IsGrounded { get; private set; }
+        public bool onLadder = false;
 
         protected Vector2 targetVelocity;
         protected Vector2 groundNormal;
@@ -108,6 +109,8 @@ namespace Platformer.Mechanics
                 velocity += Physics2D.gravity * Time.deltaTime;
 
             velocity.x = targetVelocity.x;
+            if (onLadder)
+                velocity.y = targetVelocity.y;
 
             IsGrounded = false;
 

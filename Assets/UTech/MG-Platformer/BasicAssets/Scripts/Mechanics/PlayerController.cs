@@ -21,7 +21,7 @@ namespace Platformer.Mechanics
         /// <summary>
         /// Max horizontal speed of the player.
         /// </summary>
-        public float maxSpeed_X = 7;
+        public float maxSpeed_X = 4;
         public float maxSpeed_Y = 7;
         /// <summary>
         /// Initial jump velocity at the start of a jump.
@@ -36,7 +36,7 @@ namespace Platformer.Mechanics
         public bool controlEnabled = true;
 
         bool jump;
-        Vector2 move;
+        public Vector2 move;
         SpriteRenderer spriteRenderer;
         internal Animator animator;
         readonly PlatformerModel model = Simulation.GetModel<PlatformerModel>();
@@ -56,14 +56,33 @@ namespace Platformer.Mechanics
         {
             if (controlEnabled)
             {
-                move.x = Input.GetAxis("Horizontal");
+                
+                if (onLadder)
+                {
+                    if (!spriteRenderer.flipX)
+                    {
+                        move.y = Input.GetAxis("Horizontal");
+                    }
+                    else
+                    {
+                        move.y = -Input.GetAxis("Horizontal");
+                    }
+                }
+                else
+                {
+                    move.x = Input.GetAxis("Horizontal");
+                }
 
                 if (onLadder)
-                    move.y = Input.GetAxis("Vertical");
-
+                {
+                    jumpState = JumpState.Grounded;
+                }
 
                 if (jumpState == JumpState.Grounded && Input.GetButtonDown("Jump"))
+                {
+                    onLadder = false;
                     jumpState = JumpState.PrepareToJump;
+                }
                 else if (Input.GetButtonUp("Jump"))
                 {
                      stopJump = true;
@@ -76,7 +95,7 @@ namespace Platformer.Mechanics
                 if (onLadder)
                     move.y = 0;
             }
-            if (!onLadder) UpdateJumpState();
+            UpdateJumpState();
             base.Update();
         }
 
@@ -93,7 +112,10 @@ namespace Platformer.Mechanics
                 case JumpState.Jumping:
                     if (!IsGrounded)
                     {
-                        Schedule<PlayerJumped>().player = this;
+                        if (!onLadder)
+                        {
+                            Schedule<PlayerJumped>().player = this;
+                        }
                         jumpState = JumpState.InFlight;
                     }
                     break;
@@ -130,9 +152,9 @@ namespace Platformer.Mechanics
             }
             
 
-            if (move.x > 0.01f)
+            if (move.x > 0.01f && !onLadder)
                 spriteRenderer.flipX = false;
-            else if (move.x < -0.01f)
+            else if (move.x < -0.01f && !onLadder)
                 spriteRenderer.flipX = true;
 
             animator.SetBool("grounded", IsGrounded);

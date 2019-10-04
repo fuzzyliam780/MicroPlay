@@ -16,7 +16,15 @@ public class Ladder : MonoBehaviour
 		var player = collision.gameObject.GetComponent<PlayerController>();
 		if (player != null)
 		{
-            //player.ClimbLadder();
+            player.onLadder = true; 
 		}
-	}
+    }
+    void OnCollisionExit2D(Collision2D collision)
+    {
+        var player = collision.gameObject.GetComponent<PlayerController>();
+        if (player != null)
+        {
+            player.onLadder = false;
+        }
+    }
 }
